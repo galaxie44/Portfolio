@@ -1,28 +1,28 @@
 import { PersonalInfo, Project, Skill, Experience } from '../types'
 
 export const personalInfo: PersonalInfo = {
-  name: "Votre Nom",
+  name: "Edouard Clemenceau",
   title: "Développeur Full Stack",
-  bio: "Passionné par le développement web et les nouvelles technologies, je crée des expériences numériques exceptionnelles avec une approche moderne et centrée sur l'utilisateur.",
-  location: "Ville, Pays",
-  email: "votre.email@example.com",
-  phone: "+33 6 12 34 56 78",
+  bio: "Développeur full stack basé à Orthez / Bayonne, passionné par la création d'expériences web modernes, performantes et maintenables.",
+  location: "Orthez / Bayonne, France",
+  email: "edouard.clemenceau.pro@gmail.com",
+  phone: "0779406184",
   resumeUrl: "/resume.pdf",
   socialLinks: [
     {
       name: "GitHub",
-      url: "https://github.com/votre-username",
+      url: "https://github.com/galaxie44",
       icon: "github"
     },
     {
       name: "LinkedIn",
-      url: "https://linkedin.com/in/votre-profile",
+      url: "https://www.linkedin.com/in/edouard-clemenceau-5aa01126a/",
       icon: "linkedin"
     },
     {
-      name: "Twitter",
-      url: "https://twitter.com/votre-username",
-      icon: "twitter"
+      name: "Instagram",
+      url: "https://instagram.com/edouard_clmc",
+      icon: "instagram"
     }
   ]
 }
@@ -35,9 +35,10 @@ export const projects: Project[] = [
     longDescription: "Une application e-commerce moderne construite avec React, Node.js et MongoDB. Inclut un système de panier, intégration de paiement Stripe, gestion des commandes et interface d'administration complète.",
     image: "/images/project1.jpg",
     technologies: ["React", "Node.js", "MongoDB", "Stripe", "Tailwind CSS"],
-    githubUrl: "https://github.com/votre-username/ecommerce",
+    githubUrl: "https://github.com/galaxie44/ecommerce",
     liveUrl: "https://ecommerce-demo.com",
     featured: true,
+    priority: 1,
     category: "web"
   },
   {
@@ -47,9 +48,10 @@ export const projects: Project[] = [
     longDescription: "Application de productivité permettant la gestion de projets et tâches avec collaboration en temps réel, notifications push et synchronisation multi-appareils.",
     image: "/images/project2.jpg",
     technologies: ["Vue.js", "Socket.io", "PostgreSQL", "Redis"],
-    githubUrl: "https://github.com/votre-username/task-manager",
+    githubUrl: "https://github.com/galaxie44/task-manager",
     liveUrl: "https://taskmanager-demo.com",
     featured: true,
+    priority: 2,
     category: "web"
   },
   {
@@ -59,8 +61,9 @@ export const projects: Project[] = [
     longDescription: "Application mobile native développée avec React Native offrant des prévisions météo précises, géolocalisation automatique et notifications météo personnalisées.",
     image: "/images/project3.jpg",
     technologies: ["React Native", "Expo", "OpenWeather API", "AsyncStorage"],
-    githubUrl: "https://github.com/votre-username/weather-app",
+    githubUrl: "https://github.com/galaxie44/weather-app",
     featured: false,
+    priority: 3,
     category: "mobile"
   }
 ]

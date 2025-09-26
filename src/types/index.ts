@@ -8,10 +8,12 @@ export interface Project {
   githubUrl?: string
   liveUrl?: string
   featured?: boolean
+  priority?: number // 1 = plus élevé, pour les projets en vedette
   category: 'web' | 'mobile' | 'desktop' | 'other'
 }
 
 export interface Skill {
+  id?: string
   name: string
   level: number // 1-100
   category: 'frontend' | 'backend' | 'database' | 'tools' | 'other'

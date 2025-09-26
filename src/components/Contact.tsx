@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
-import { Mail, Phone, MapPin, Send, Github, Linkedin, Twitter } from 'lucide-react'
+import { Mail, Phone, MapPin, Send, Github, Linkedin, Instagram } from 'lucide-react'
 import { personalInfo } from '../data/personalInfo'
 import { ContactForm } from '../types'
 import { saveMessage } from '../utils/messageStorage'
@@ -75,8 +75,8 @@ const Contact = () => {
         return <Github className="w-5 h-5" />
       case 'linkedin':
         return <Linkedin className="w-5 h-5" />
-      case 'twitter':
-        return <Twitter className="w-5 h-5" />
+      case 'instagram':
+        return <Instagram className="w-5 h-5" />
       default:
         return <Mail className="w-5 h-5" />
     }

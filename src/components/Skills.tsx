@@ -1,12 +1,14 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
-import { skills } from '../data/personalInfo'
+import { getSkills } from '../utils/adminStorage'
 
 const Skills = () => {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1
   })
+  const [skills] = useState(getSkills())
 
   const containerVariants = {
     hidden: { opacity: 0 },

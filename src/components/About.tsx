@@ -1,12 +1,18 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
+import { Edit3 } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 import { personalInfo, experiences } from '../data/personalInfo'
+import AdminEditMode from './AdminEditMode'
 
 const About = () => {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1
   })
+  const { isAuthenticated } = useAuth()
+  const [showEditMode, setShowEditMode] = useState(false)
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -38,9 +44,22 @@ const About = () => {
         >
           {/* Section Header */}
           <motion.div variants={itemVariants} className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              À propos de <span className="gradient-text">moi</span>
-            </h2>
+            <div className="flex items-center justify-center space-x-4 mb-4">
+              <h2 className="text-4xl md:text-5xl font-bold">
+                À propos de <span className="gradient-text">moi</span>
+              </h2>
+              {isAuthenticated && (
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowEditMode(true)}
+                  className="p-2 bg-primary-100 dark:bg-primary-900 hover:bg-primary-200 dark:hover:bg-primary-800 rounded-lg transition-colors"
+                  title="Mode édition admin"
+                >
+                  <Edit3 className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                </motion.button>
+              )}
+            </div>
             <p className="text-lg text-dark-600 dark:text-dark-400 max-w-2xl mx-auto">
               Découvrez mon parcours, mes passions et ce qui me motive dans le développement
             </p>
@@ -148,6 +167,11 @@ const About = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Admin Edit Mode Modal */}
+      {showEditMode && (
+        <AdminEditMode onClose={() => setShowEditMode(false)} />
+      )}
     </section>
   )
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Lock, User, Eye, EyeOff } from 'lucide-react'
+import { Lock, User, Eye, EyeOff, Home } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 interface LoginProps {
@@ -42,6 +42,10 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
       ...prev,
       [name]: value
     }))
+  }
+
+  const goToHome = () => {
+    window.location.href = '/'
   }
 
   return (
@@ -146,6 +150,19 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
               )}
             </motion.button>
           </form>
+
+          {/* Bouton retour au portfolio */}
+          <div className="mt-4">
+            <motion.button
+              onClick={goToHome}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-dark-100 dark:bg-dark-700 text-dark-700 dark:text-dark-300 rounded-lg hover:bg-dark-200 dark:hover:bg-dark-600 transition-colors duration-200"
+            >
+              <Home className="w-4 h-4" />
+              <span>Retour au portfolio</span>
+            </motion.button>
+          </div>
 
           <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
             <p className="text-sm text-blue-700 dark:text-blue-300">

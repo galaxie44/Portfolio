@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { ChevronDown, Download, Github, Linkedin, Mail } from 'lucide-react'
+import { ChevronDown, Download, Github, Linkedin, Mail, Instagram } from 'lucide-react'
 import { personalInfo } from '../data/personalInfo'
 
 const Hero = () => {
@@ -16,8 +16,8 @@ const Hero = () => {
         return <Github className="w-5 h-5" />
       case 'linkedin':
         return <Linkedin className="w-5 h-5" />
-      case 'twitter':
-        return <Mail className="w-5 h-5" />
+      case 'instagram':
+        return <Instagram className="w-5 h-5" />
       default:
         return <Mail className="w-5 h-5" />
     }

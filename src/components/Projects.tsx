@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { ExternalLink, Github, Eye } from 'lucide-react'
-import { projects } from '../data/personalInfo'
+import { getProjects, getFeaturedProjects } from '../utils/adminStorage'
 
 const Projects = () => {
   const [ref, inView] = useInView({
@@ -11,6 +11,8 @@ const Projects = () => {
   })
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [projects] = useState(getProjects())
+  const [featuredProjects] = useState(getFeaturedProjects())
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -42,8 +44,6 @@ const Projects = () => {
   const filteredProjects = selectedCategory === 'all'
     ? projects
     : projects.filter(project => project.category === selectedCategory)
-
-  const featuredProjects = projects.filter(project => project.featured)
 
   return (
     <section id="projects" className="section bg-dark-50 dark:bg-dark-800/50">
