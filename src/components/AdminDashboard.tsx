@@ -11,10 +11,8 @@ import {
   MessageSquare,
   CheckCircle,
   Home,
-  Settings,
-  Plus,
-  Edit,
-  TrashIcon
+  Moon,
+  Sun
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { ContactMessage } from '../types/auth'
@@ -44,10 +42,22 @@ const AdminDashboard: React.FC = () => {
   const [skills, setSkills] = useState<Skill[]>([])
   const [showSkillForm, setShowSkillForm] = useState(false)
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null)
+  const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
     loadMessages()
     loadSkills()
+    // Sync dark mode from localStorage
+    const savedTheme = localStorage.getItem('darkMode')
+    if (savedTheme) {
+      const dark = JSON.parse(savedTheme)
+      setIsDark(dark)
+      if (dark) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    }
   }, [])
 
   const loadMessages = () => {
@@ -84,6 +94,17 @@ const AdminDashboard: React.FC = () => {
   const handleEditSkill = (skill: Skill) => {
     setEditingSkill(skill)
     setShowSkillForm(true)
+  }
+
+  const toggleDarkMode = () => {
+    const next = !isDark
+    setIsDark(next)
+    if (next) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+    localStorage.setItem('darkMode', JSON.stringify(next))
   }
 
   const handleMessageClick = (message: ContactMessage) => {
@@ -165,7 +186,21 @@ const AdminDashboard: React.FC = () => {
                 <span>{unreadCount} non lus</span>
               </div>
 
-              {/* Onglets de navigation */}
+              {/* Dark mode toggle + Onglets de navigation */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={toggleDarkMode}
+                className="p-2 rounded-lg bg-dark-100 dark:bg-dark-700 hover:bg-dark-200 dark:hover:bg-dark-600 transition-colors"
+                title="Basculer le thème"
+              >
+                {isDark ? (
+                  <Sun className="w-4 h-4 text-yellow-500" />
+                ) : (
+                  <Moon className="w-4 h-4 text-dark-600" />
+                )}
+              </motion.button>
+
               <div className="flex space-x-1 bg-dark-100 dark:bg-dark-700 rounded-lg p-1">
                 <button
                   onClick={() => setActiveTab('messages')}

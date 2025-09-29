@@ -1,9 +1,12 @@
-import { Project, Skill, PersonalInfo } from '../types'
+import { Project, Skill, PersonalInfo, Experience } from '../types'
+import { projects as defaultProjects, skills as defaultSkills, experiences as defaultExperiences } from '../data/personalInfo'
+import { defaultOtherSkills } from '../data/defaultSkills'
 
 const STORAGE_KEYS = {
   projects: 'portfolio_projects',
   skills: 'portfolio_skills',
-  personalInfo: 'portfolio_personal_info'
+  personalInfo: 'portfolio_personal_info',
+  experiences: 'portfolio_experiences'
 }
 
 // Projects
@@ -18,7 +21,6 @@ export const getProjects = (): Project[] => {
       return JSON.parse(projects)
     }
     // Si pas de données en localStorage, retourner les données par défaut
-    const { projects: defaultProjects } = require('../data/personalInfo')
     return defaultProjects
   } catch (error) {
     console.error('Error loading projects:', error)
@@ -63,8 +65,7 @@ export const getSkills = (): Skill[] => {
       return JSON.parse(skills)
     }
     // Si pas de données en localStorage, retourner les données par défaut
-    const { skills: defaultSkills } = require('../data/personalInfo')
-    return defaultSkills
+    return [...defaultSkills, ...defaultOtherSkills]
   } catch (error) {
     console.error('Error loading skills:', error)
     return []
@@ -109,6 +110,50 @@ export const getPersonalInfo = (): PersonalInfo | null => {
     console.error('Error loading personal info:', error)
     return null
   }
+}
+
+// Experiences
+export const saveExperiences = (experiences: Experience[]): void => {
+  localStorage.setItem(STORAGE_KEYS.experiences, JSON.stringify(experiences))
+}
+
+export const getExperiences = (): Experience[] => {
+  try {
+    const experiences = localStorage.getItem(STORAGE_KEYS.experiences)
+    if (experiences) {
+      return JSON.parse(experiences)
+    }
+    // Si pas de données en localStorage, retourner les données par défaut
+    return defaultExperiences
+  } catch (error) {
+    console.error('Error loading experiences:', error)
+    return []
+  }
+}
+
+export const addExperience = (experience: Omit<Experience, 'id'>): Experience => {
+  const experiences = getExperiences()
+  const newExperience: Experience = {
+    ...experience,
+    id: Date.now().toString()
+  }
+  const updatedExperiences = [...experiences, newExperience]
+  saveExperiences(updatedExperiences)
+  return newExperience
+}
+
+export const updateExperience = (id: string, updates: Partial<Experience>): void => {
+  const experiences = getExperiences()
+  const updatedExperiences = experiences.map(experience =>
+    experience.id === id ? { ...experience, ...updates } : experience
+  )
+  saveExperiences(updatedExperiences)
+}
+
+export const deleteExperience = (id: string): void => {
+  const experiences = getExperiences()
+  const updatedExperiences = experiences.filter(experience => experience.id !== id)
+  saveExperiences(updatedExperiences)
 }
 
 // Featured projects logic

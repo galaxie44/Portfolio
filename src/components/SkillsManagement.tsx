@@ -37,7 +37,8 @@ const SkillsManagement: React.FC<SkillsManagementProps> = ({
     frontend: skills.filter(skill => skill.category === 'frontend'),
     backend: skills.filter(skill => skill.category === 'backend'),
     database: skills.filter(skill => skill.category === 'database'),
-    tools: skills.filter(skill => skill.category === 'tools')
+    tools: skills.filter(skill => skill.category === 'tools'),
+    other: skills.filter(skill => skill.category === 'other')
   }
 
   const getCategoryTitle = (category: string) => {
@@ -140,6 +141,7 @@ const SkillsManagement: React.FC<SkillsManagementProps> = ({
                 <option value="backend">Backend</option>
                 <option value="database">Base de données</option>
                 <option value="tools">Outils</option>
+                <option value="other">Autres</option>
               </select>
             </div>
 

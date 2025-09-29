@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { Edit3 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { personalInfo, experiences } from '../data/personalInfo'
+import { personalInfo, experiences as defaultExperiences } from '../data/personalInfo'
+import { getExperiences } from '../utils/adminStorage'
+import { Experience } from '../types'
 import AdminEditMode from './AdminEditMode'
 
 const About = () => {
@@ -13,6 +15,15 @@ const About = () => {
   })
   const { isAuthenticated } = useAuth()
   const [showEditMode, setShowEditMode] = useState(false)
+  const [experiences, setExperiences] = useState<Experience[]>(defaultExperiences)
+
+  useEffect(() => {
+    // Charger les expériences depuis le localStorage
+    const storedExperiences = getExperiences()
+    if (storedExperiences.length > 0) {
+      setExperiences(storedExperiences)
+    }
+  }, [])
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -170,7 +181,16 @@ const About = () => {
 
       {/* Admin Edit Mode Modal */}
       {showEditMode && (
-        <AdminEditMode onClose={() => setShowEditMode(false)} />
+        <AdminEditMode
+          onClose={() => {
+            setShowEditMode(false)
+            // Recharger les expériences après fermeture du mode édition
+            const updatedExperiences = getExperiences()
+            if (updatedExperiences.length > 0) {
+              setExperiences(updatedExperiences)
+            }
+          }}
+        />
       )}
     </section>
   )

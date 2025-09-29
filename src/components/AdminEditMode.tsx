@@ -7,12 +7,11 @@ import {
   Plus,
   Trash2,
   Star,
-  StarOff,
   ArrowUp,
   ArrowDown
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { Project, Skill } from '../types'
+import { Project, Skill, Experience } from '../types'
 import {
   getProjects,
   saveProjects,
@@ -23,8 +22,14 @@ import {
   saveSkills,
   addSkill,
   updateSkill,
-  deleteSkill
+  deleteSkill,
+  getExperiences,
+  saveExperiences,
+  addExperience,
+  updateExperience,
+  deleteExperience
 } from '../utils/adminStorage'
+import ExperienceManagement from './ExperienceManagement'
 
 interface AdminEditModeProps {
   onClose: () => void
@@ -32,11 +37,13 @@ interface AdminEditModeProps {
 
 const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
   const { isAuthenticated } = useAuth()
-  const [activeTab, setActiveTab] = useState<'projects' | 'skills'>('projects')
+  const [activeTab, setActiveTab] = useState<'projects' | 'skills' | 'experiences'>('projects')
   const [projects, setProjects] = useState<Project[]>([])
   const [skills, setSkills] = useState<Skill[]>([])
+  const [experiences, setExperiences] = useState<Experience[]>([])
   const [editingProject, setEditingProject] = useState<Project | null>(null)
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null)
+  const [editingExperience, setEditingExperience] = useState<Experience | null>(null)
   const [showAddForm, setShowAddForm] = useState(false)
 
   useEffect(() => {
@@ -48,6 +55,7 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
   const loadData = () => {
     setProjects(getProjects())
     setSkills(getSkills())
+    setExperiences(getExperiences())
   }
 
   const handleSaveProjects = () => {
@@ -64,8 +72,15 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
     alert('Compétences sauvegardées avec succès!')
   }
 
+  const handleSaveExperiences = () => {
+    saveExperiences(experiences)
+    // Recharger les données depuis le localStorage
+    setExperiences(getExperiences())
+    alert('Expériences sauvegardées avec succès!')
+  }
+
   const handleAddProject = (projectData: Omit<Project, 'id'>) => {
-    const newProject = addProject(projectData)
+    addProject(projectData)
     setProjects(getProjects()) // Recharger depuis localStorage
     setShowAddForm(false)
   }
@@ -82,7 +97,7 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
   }
 
   const handleAddSkill = (skillData: Omit<Skill, 'id'>) => {
-    const newSkill = addSkill(skillData)
+    addSkill(skillData)
     setSkills(getSkills()) // Recharger depuis localStorage
     setShowAddForm(false)
   }
@@ -96,6 +111,28 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
   const handleDeleteSkill = (name: string) => {
     deleteSkill(name)
     setSkills(getSkills()) // Recharger depuis localStorage
+  }
+
+  const handleAddExperience = (experienceData: Omit<Experience, 'id'>) => {
+    addExperience(experienceData)
+    setExperiences(getExperiences()) // Recharger depuis localStorage
+    setShowAddForm(false)
+  }
+
+  const handleUpdateExperience = (id: string, updates: Partial<Experience>) => {
+    updateExperience(id, updates)
+    setExperiences(getExperiences()) // Recharger depuis localStorage
+    setEditingExperience(null)
+  }
+
+  const handleDeleteExperience = (id: string) => {
+    deleteExperience(id)
+    setExperiences(getExperiences()) // Recharger depuis localStorage
+  }
+
+  const handleEditExperience = (experience: Experience) => {
+    setEditingExperience(experience)
+    setShowAddForm(true)
   }
 
   const moveProjectPriority = (id: string, direction: 'up' | 'down') => {
@@ -163,6 +200,16 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
           >
             Compétences
           </button>
+          <button
+            onClick={() => setActiveTab('experiences')}
+            className={`px-6 py-3 font-medium transition-colors ${
+              activeTab === 'experiences'
+                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
+                : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
+            }`}
+          >
+            Parcours
+          </button>
         </div>
 
         {/* Content */}
@@ -193,6 +240,23 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
               setEditingSkill={setEditingSkill}
             />
           )}
+
+          {activeTab === 'experiences' && (
+            <ExperienceManagement
+              experiences={experiences}
+              onAdd={handleAddExperience}
+              onUpdate={handleUpdateExperience}
+              onDelete={handleDeleteExperience}
+              onEdit={handleEditExperience}
+              showForm={showAddForm}
+              editingExperience={editingExperience}
+              onShowForm={setShowAddForm}
+              onCancelEdit={() => {
+                setShowAddForm(false)
+                setEditingExperience(null)
+              }}
+            />
+          )}
         </div>
 
         {/* Footer */}
@@ -204,11 +268,25 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
             Annuler
           </button>
           <button
-            onClick={activeTab === 'projects' ? handleSaveProjects : handleSaveSkills}
+            onClick={
+              activeTab === 'projects'
+                ? handleSaveProjects
+                : activeTab === 'skills'
+                ? handleSaveSkills
+                : handleSaveExperiences
+            }
             className="btn-primary flex items-center space-x-2"
           >
             <Save className="w-4 h-4" />
-            <span>Sauvegarder {activeTab === 'projects' ? 'Projets' : 'Compétences'}</span>
+            <span>
+              Sauvegarder {
+                activeTab === 'projects'
+                  ? 'Projets'
+                  : activeTab === 'skills'
+                  ? 'Compétences'
+                  : 'Parcours'
+              }
+            </span>
           </button>
         </div>
       </motion.div>
@@ -227,7 +305,7 @@ const ProjectsEditor: React.FC<{
   setShowAddForm: (show: boolean) => void
   editingProject: Project | null
   setEditingProject: (project: Project | null) => void
-}> = ({ projects, onAdd, onUpdate, onDelete, onMovePriority, showAddForm, setShowAddForm, editingProject, setEditingProject }) => {
+}> = ({ projects, onAdd, onUpdate, onDelete, onMovePriority, showAddForm, setShowAddForm, editingProject: _editingProject, setEditingProject: _setEditingProject }) => {
   const [newProject, setNewProject] = useState<Omit<Project, 'id'>>({
     title: '',
     description: '',
@@ -453,7 +531,7 @@ const SkillsEditor: React.FC<{
   setShowAddForm: (show: boolean) => void
   editingSkill: Skill | null
   setEditingSkill: (skill: Skill | null) => void
-}> = ({ skills, onAdd, onUpdate, onDelete, showAddForm, setShowAddForm, editingSkill, setEditingSkill }) => {
+}> = ({ skills, onAdd, onUpdate, onDelete, showAddForm, setShowAddForm, editingSkill: _editingSkill, setEditingSkill: _setEditingSkill }) => {
   const [newSkill, setNewSkill] = useState<Omit<Skill, 'id'>>({
     name: '',
     level: 50,
