@@ -11,9 +11,14 @@ import {
   MessageSquare,
   CheckCircle,
   Home,
+  Settings,
+  Plus,
+  Edit,
+  TrashIcon
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { ContactMessage } from '../types/auth'
+import { Skill } from '../types'
 import {
   getMessages,
   markMessageAsRead,
@@ -21,6 +26,13 @@ import {
   deleteMessage,
   getUnreadCount
 } from '../utils/messageStorage'
+import {
+  getSkills,
+  addSkill,
+  updateSkill,
+  deleteSkill
+} from '../utils/adminStorage'
+import SkillsManagement from './SkillsManagement'
 
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth()
@@ -28,15 +40,50 @@ const AdminDashboard: React.FC = () => {
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null)
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all')
   const [unreadCount, setUnreadCount] = useState(0)
+  const [activeTab, setActiveTab] = useState<'messages' | 'skills'>('messages')
+  const [skills, setSkills] = useState<Skill[]>([])
+  const [showSkillForm, setShowSkillForm] = useState(false)
+  const [editingSkill, setEditingSkill] = useState<Skill | null>(null)
 
   useEffect(() => {
     loadMessages()
+    loadSkills()
   }, [])
 
   const loadMessages = () => {
     const allMessages = getMessages()
     setMessages(allMessages)
     setUnreadCount(getUnreadCount())
+  }
+
+  const loadSkills = () => {
+    const allSkills = getSkills()
+    setSkills(allSkills)
+  }
+
+  const handleAddSkill = (skill: Omit<Skill, 'id'>) => {
+    addSkill(skill)
+    loadSkills()
+    setShowSkillForm(false)
+    setEditingSkill(null)
+  }
+
+  const handleUpdateSkill = (skillName: string, updates: Partial<Skill>) => {
+    updateSkill(skillName, updates)
+    loadSkills()
+    setEditingSkill(null)
+  }
+
+  const handleDeleteSkill = (skillName: string) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette compétence ?')) {
+      deleteSkill(skillName)
+      loadSkills()
+    }
+  }
+
+  const handleEditSkill = (skill: Skill) => {
+    setEditingSkill(skill)
+    setShowSkillForm(true)
   }
 
   const handleMessageClick = (message: ContactMessage) => {
@@ -118,6 +165,30 @@ const AdminDashboard: React.FC = () => {
                 <span>{unreadCount} non lus</span>
               </div>
 
+              {/* Onglets de navigation */}
+              <div className="flex space-x-1 bg-dark-100 dark:bg-dark-700 rounded-lg p-1">
+                <button
+                  onClick={() => setActiveTab('messages')}
+                  className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                    activeTab === 'messages'
+                      ? 'bg-primary-600 text-white'
+                      : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:text-white'
+                  }`}
+                >
+                  Messages
+                </button>
+                <button
+                  onClick={() => setActiveTab('skills')}
+                  className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                    activeTab === 'skills'
+                      ? 'bg-primary-600 text-white'
+                      : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:text-white'
+                  }`}
+                >
+                  Compétences
+                </button>
+              </div>
+
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -143,7 +214,8 @@ const AdminDashboard: React.FC = () => {
       </header>
 
       <div className="container py-8">
-        <div className="grid lg:grid-cols-3 gap-8">
+        {activeTab === 'messages' ? (
+          <div className="grid lg:grid-cols-3 gap-8">
           {/* Messages List */}
           <div className="lg:col-span-1">
             <div className="card">
@@ -308,6 +380,28 @@ const AdminDashboard: React.FC = () => {
             )}
           </div>
         </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <SkillsManagement
+              skills={skills}
+              onAdd={handleAddSkill}
+              onUpdate={handleUpdateSkill}
+              onDelete={handleDeleteSkill}
+              onEdit={handleEditSkill}
+              showForm={showSkillForm}
+              editingSkill={editingSkill}
+              onShowForm={setShowSkillForm}
+              onCancelEdit={() => {
+                setShowSkillForm(false)
+                setEditingSkill(null)
+              }}
+            />
+          </motion.div>
+        )}
       </div>
     </div>
   )

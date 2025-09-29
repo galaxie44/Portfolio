@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { getSkills } from '../utils/adminStorage'
+import { getSkillLevelFromPercentage } from '../utils/skillLevels'
 
 const Skills = () => {
   const [ref, inView] = useInView({
@@ -86,12 +87,14 @@ const Skills = () => {
           </motion.div>
 
           {/* Skills Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {Object.entries(skillCategories).map(([category, categorySkills]) => (
+          <div className="flex flex-wrap justify-center gap-8">
+            {Object.entries(skillCategories)
+              .filter(([, categorySkills]) => categorySkills.length > 0)
+              .map(([category, categorySkills]) => (
               <motion.div
                 key={category}
                 variants={itemVariants}
-                className="card hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                className="card hover:shadow-xl transition-all duration-300 hover:-translate-y-1 w-72 max-w-sm"
               >
                 <div className="text-center mb-6">
                   <div className="text-4xl mb-3">
@@ -105,12 +108,12 @@ const Skills = () => {
                 <div className="space-y-4">
                   {categorySkills.map((skill) => (
                     <div key={skill.name} className="space-y-2">
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center mb-1">
                         <span className="text-sm font-medium text-dark-700 dark:text-dark-300">
                           {skill.name}
                         </span>
-                        <span className="text-xs text-primary-600 dark:text-primary-400">
-                          {skill.level}%
+                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${getSkillLevelFromPercentage(skill.level).color} bg-opacity-20`}>
+                          {getSkillLevelFromPercentage(skill.level).label}
                         </span>
                       </div>
 
