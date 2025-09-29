@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
-import { ExternalLink, Github, Eye } from 'lucide-react'
+import { ExternalLink, Github, Eye, Edit3 } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 import { getProjects, getFeaturedProjects } from '../utils/adminStorage'
+import AdminEditMode from './AdminEditMode'
 
 const Projects = () => {
   const [ref, inView] = useInView({
@@ -10,9 +12,11 @@ const Projects = () => {
     threshold: 0.1
   })
 
+  const { isAuthenticated } = useAuth()
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [projects] = useState(getProjects())
   const [featuredProjects] = useState(getFeaturedProjects())
+  const [showEditMode, setShowEditMode] = useState(false)
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -56,9 +60,22 @@ const Projects = () => {
         >
           {/* Section Header */}
           <motion.div variants={itemVariants} className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Mes <span className="gradient-text">projets</span>
-            </h2>
+            <div className="flex items-center justify-center space-x-4 mb-4">
+              <h2 className="text-4xl md:text-5xl font-bold">
+                Mes <span className="gradient-text">projets</span>
+              </h2>
+              {isAuthenticated && (
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowEditMode(true)}
+                  className="p-2 bg-primary-100 dark:bg-primary-900 hover:bg-primary-200 dark:hover:bg-primary-800 rounded-lg transition-colors"
+                  title="Mode édition admin"
+                >
+                  <Edit3 className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                </motion.button>
+              )}
+            </div>
             <p className="text-lg text-dark-600 dark:text-dark-400 max-w-2xl mx-auto">
               Découvrez quelques-uns de mes projets récents et les technologies utilisées
             </p>
@@ -71,7 +88,8 @@ const Projects = () => {
                 Projets en vedette
               </h3>
 
-              <div className="grid lg:grid-cols-2 gap-8">
+              <div className="flex justify-center">
+                <div className="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
                 {featuredProjects.map((project) => (
                   <motion.div
                     key={project.id}
@@ -80,7 +98,15 @@ const Projects = () => {
                   >
                     <div className="relative overflow-hidden rounded-lg mb-6">
                       <div className="aspect-video bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center">
-                        <div className="text-6xl opacity-20">🚀</div>
+                        {project.image && project.image !== '/images/project.jpg' ? (
+                          <img
+                            src={project.image}
+                            alt={project.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="text-6xl opacity-20">🚀</div>
+                        )}
                       </div>
 
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-4">
@@ -157,15 +183,16 @@ const Projects = () => {
                     </div>
                   </motion.div>
                 ))}
+                </div>
               </div>
             </motion.div>
           )}
 
-          {/* All Projects */}
-          <motion.div variants={itemVariants}>
-            <h3 className="text-2xl font-bold text-dark-900 dark:text-white mb-8 text-center">
-              Tous les projets
-            </h3>
+            {/* All Projects */}
+            <motion.div variants={itemVariants}>
+              <h3 className="text-2xl font-bold text-dark-900 dark:text-white mb-8 text-center">
+                Tous les projets
+              </h3>
 
             {/* Category Filter */}
             <div className="flex flex-wrap justify-center gap-4 mb-12">
@@ -187,8 +214,30 @@ const Projects = () => {
             </div>
 
             {/* Projects Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredProjects.map((project) => (
+            {filteredProjects.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-16"
+              >
+                <div className="text-6xl mb-4 opacity-50">
+                  {selectedCategory === 'web' ? '🌐' :
+                   selectedCategory === 'mobile' ? '📱' :
+                   selectedCategory === 'desktop' ? '💻' :
+                   selectedCategory === 'other' ? '🔧' : '📁'}
+                </div>
+                <h3 className="text-xl font-semibold text-dark-900 dark:text-white mb-2">
+                  Aucun projet {selectedCategory === 'all' ? '' : `dans la catégorie ${categories.find(c => c.id === selectedCategory)?.name}`}
+                </h3>
+                <p className="text-dark-600 dark:text-dark-400 max-w-md mx-auto">
+                  {selectedCategory === 'all'
+                    ? "Aucun projet n'a encore été ajouté. Connectez-vous en tant qu'administrateur pour ajouter vos premiers projets."
+                    : `Aucun projet ${categories.find(c => c.id === selectedCategory)?.name.toLowerCase()} n'a encore été ajouté.`}
+                </p>
+              </motion.div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredProjects.map((project) => (
                 <motion.div
                   key={project.id}
                   layout
@@ -200,7 +249,15 @@ const Projects = () => {
                 >
                   <div className="relative overflow-hidden rounded-lg mb-4">
                     <div className="aspect-video bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center">
-                      <div className="text-4xl opacity-20">💻</div>
+                      {project.image && project.image !== '/images/project.jpg' ? (
+                        <img
+                          src={project.image}
+                          alt={project.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-4xl opacity-20">💻</div>
+                      )}
                     </div>
 
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-4">
@@ -282,10 +339,24 @@ const Projects = () => {
                   </div>
                 </motion.div>
               ))}
-            </div>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       </div>
+
+      {/* Admin Edit Mode Modal */}
+      {showEditMode && (
+        <AdminEditMode
+          initialTab="projects"
+          allowedTabs={['projects']}
+          onClose={() => {
+            setShowEditMode(false)
+            // Recharger les projets après fermeture du mode édition
+            window.location.reload()
+          }}
+        />
+      )}
     </section>
   )
 }

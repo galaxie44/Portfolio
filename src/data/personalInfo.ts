@@ -8,6 +8,7 @@ export const personalInfo: PersonalInfo = {
   email: "edouard.clemenceau.pro@gmail.com",
   phone: "0779406184",
   resumeUrl: "/resume.pdf",
+  availability: "available",
   socialLinks: [
     {
       name: "GitHub",

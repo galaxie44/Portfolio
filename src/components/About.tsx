@@ -15,6 +15,7 @@ const About = () => {
   })
   const { isAuthenticated } = useAuth()
   const [showEditMode, setShowEditMode] = useState(false)
+  const [editModeType, setEditModeType] = useState<'personal' | 'experiences'>('personal')
   const [experiences, setExperiences] = useState<Experience[]>(defaultExperiences)
 
   useEffect(() => {
@@ -63,7 +64,10 @@ const About = () => {
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => setShowEditMode(true)}
+                  onClick={() => {
+                    setEditModeType('personal')
+                    setShowEditMode(true)
+                  }}
                   className="p-2 bg-primary-100 dark:bg-primary-900 hover:bg-primary-200 dark:hover:bg-primary-800 rounded-lg transition-colors"
                   title="Mode édition admin"
                 >
@@ -112,6 +116,20 @@ const About = () => {
                     </span>
                   </div>
                 )}
+                {personalInfo.availability && (
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-2 h-2 rounded-full ${
+                      personalInfo.availability === 'available' ? 'bg-green-500' :
+                      personalInfo.availability === 'busy' ? 'bg-yellow-500' : 'bg-red-500'
+                    }`}></div>
+                    <span className="text-dark-700 dark:text-dark-300">
+                      <strong>Statut:</strong> {
+                        personalInfo.availability === 'available' ? 'Disponible' :
+                        personalInfo.availability === 'busy' ? 'Occupé' : 'Non disponible'
+                      }
+                    </span>
+                  </div>
+                )}
               </div>
             </motion.div>
 
@@ -121,7 +139,7 @@ const About = () => {
                 Mon parcours
               </h3>
 
-              <div className="space-y-6">
+              <div className="space-y-6 max-w-4xl mx-auto">
                 {experiences.map((exp) => (
                   <motion.div
                     key={exp.id}
@@ -182,6 +200,8 @@ const About = () => {
       {/* Admin Edit Mode Modal */}
       {showEditMode && (
         <AdminEditMode
+          initialTab={editModeType}
+          allowedTabs={['personal', 'experiences']}
           onClose={() => {
             setShowEditMode(false)
             // Recharger les expériences après fermeture du mode édition

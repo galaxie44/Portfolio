@@ -8,10 +8,12 @@ import {
   Trash2,
   Star,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { Project, Skill, Experience } from '../types'
+import { Project, Skill, Experience, PersonalInfo } from '../types'
 import {
   getProjects,
   saveProjects,
@@ -27,20 +29,26 @@ import {
   saveExperiences,
   addExperience,
   updateExperience,
-  deleteExperience
+  deleteExperience,
+  getPersonalInfo,
+  savePersonalInfo
 } from '../utils/adminStorage'
+import { personalInfo as defaultPersonalInfo } from '../data/personalInfo'
 import ExperienceManagement from './ExperienceManagement'
 
 interface AdminEditModeProps {
   onClose: () => void
+  initialTab?: 'projects' | 'skills' | 'experiences' | 'personal'
+  allowedTabs?: ('projects' | 'skills' | 'experiences' | 'personal')[]
 }
 
-const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
+const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose, initialTab = 'projects', allowedTabs = ['projects', 'skills', 'experiences', 'personal'] }) => {
   const { isAuthenticated } = useAuth()
-  const [activeTab, setActiveTab] = useState<'projects' | 'skills' | 'experiences'>('projects')
+  const [activeTab, setActiveTab] = useState<'projects' | 'skills' | 'experiences' | 'personal'>(initialTab)
   const [projects, setProjects] = useState<Project[]>([])
   const [skills, setSkills] = useState<Skill[]>([])
   const [experiences, setExperiences] = useState<Experience[]>([])
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>(getPersonalInfo() || defaultPersonalInfo)
   const [editingProject, setEditingProject] = useState<Project | null>(null)
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null)
   const [editingExperience, setEditingExperience] = useState<Experience | null>(null)
@@ -56,6 +64,7 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
     setProjects(getProjects())
     setSkills(getSkills())
     setExperiences(getExperiences())
+    setPersonalInfo(getPersonalInfo() || defaultPersonalInfo)
   }
 
   const handleSaveProjects = () => {
@@ -77,6 +86,14 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
     // Recharger les données depuis le localStorage
     setExperiences(getExperiences())
     alert('Expériences sauvegardées avec succès!')
+  }
+
+  const handleSavePersonalInfo = () => {
+    if (personalInfo) {
+      savePersonalInfo(personalInfo)
+      setPersonalInfo(getPersonalInfo() || defaultPersonalInfo)
+      alert('Informations personnelles sauvegardées avec succès!')
+    }
   }
 
   const handleAddProject = (projectData: Omit<Project, 'id'>) => {
@@ -180,36 +197,54 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
 
         {/* Tabs */}
         <div className="flex border-b border-dark-200 dark:border-dark-700">
-          <button
-            onClick={() => setActiveTab('projects')}
-            className={`px-6 py-3 font-medium transition-colors ${
-              activeTab === 'projects'
-                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
-                : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
-            }`}
-          >
-            Projets
-          </button>
-          <button
-            onClick={() => setActiveTab('skills')}
-            className={`px-6 py-3 font-medium transition-colors ${
-              activeTab === 'skills'
-                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
-                : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
-            }`}
-          >
-            Compétences
-          </button>
-          <button
-            onClick={() => setActiveTab('experiences')}
-            className={`px-6 py-3 font-medium transition-colors ${
-              activeTab === 'experiences'
-                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
-                : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
-            }`}
-          >
-            Parcours
-          </button>
+          {allowedTabs.includes('projects') && (
+            <button
+              onClick={() => setActiveTab('projects')}
+              className={`px-6 py-3 font-medium transition-colors ${
+                activeTab === 'projects'
+                  ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
+                  : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
+              }`}
+            >
+              Projets
+            </button>
+          )}
+          {allowedTabs.includes('skills') && (
+            <button
+              onClick={() => setActiveTab('skills')}
+              className={`px-6 py-3 font-medium transition-colors ${
+                activeTab === 'skills'
+                  ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
+                  : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
+              }`}
+            >
+              Compétences
+            </button>
+          )}
+          {allowedTabs.includes('experiences') && (
+            <button
+              onClick={() => setActiveTab('experiences')}
+              className={`px-6 py-3 font-medium transition-colors ${
+                activeTab === 'experiences'
+                  ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
+                  : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
+              }`}
+            >
+              Parcours
+            </button>
+          )}
+          {allowedTabs.includes('personal') && (
+            <button
+              onClick={() => setActiveTab('personal')}
+              className={`px-6 py-3 font-medium transition-colors ${
+                activeTab === 'personal'
+                  ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
+                  : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
+              }`}
+            >
+              Informations
+            </button>
+          )}
         </div>
 
         {/* Content */}
@@ -257,6 +292,13 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
               }}
             />
           )}
+
+          {activeTab === 'personal' && (
+            <PersonalInfoEditor
+              personalInfo={personalInfo}
+              onUpdate={setPersonalInfo}
+            />
+          )}
         </div>
 
         {/* Footer */}
@@ -273,7 +315,9 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
                 ? handleSaveProjects
                 : activeTab === 'skills'
                 ? handleSaveSkills
-                : handleSaveExperiences
+                : activeTab === 'experiences'
+                ? handleSaveExperiences
+                : handleSavePersonalInfo
             }
             className="btn-primary flex items-center space-x-2"
           >
@@ -284,7 +328,9 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose }) => {
                   ? 'Projets'
                   : activeTab === 'skills'
                   ? 'Compétences'
-                  : 'Parcours'
+                  : activeTab === 'experiences'
+                  ? 'Parcours'
+                  : 'Informations'
               }
             </span>
           </button>
@@ -305,7 +351,7 @@ const ProjectsEditor: React.FC<{
   setShowAddForm: (show: boolean) => void
   editingProject: Project | null
   setEditingProject: (project: Project | null) => void
-}> = ({ projects, onAdd, onUpdate, onDelete, onMovePriority, showAddForm, setShowAddForm, editingProject: _editingProject, setEditingProject: _setEditingProject }) => {
+}> = ({ projects, onAdd, onUpdate, onDelete, onMovePriority, showAddForm, setShowAddForm, editingProject, setEditingProject }) => {
   const [newProject, setNewProject] = useState<Omit<Project, 'id'>>({
     title: '',
     description: '',
@@ -315,9 +361,43 @@ const ProjectsEditor: React.FC<{
     githubUrl: '',
     liveUrl: '',
     featured: false,
-    priority: 999,
+    priority: 1,
     category: 'web'
   })
+
+  const [newTechnology, setNewTechnology] = useState('')
+  const [isUploading, setIsUploading] = useState(false)
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setIsUploading(true)
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const result = e.target?.result as string
+        setNewProject({ ...newProject, image: result })
+        setIsUploading(false)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const addTechnology = () => {
+    if (newTechnology.trim()) {
+      setNewProject({
+        ...newProject,
+        technologies: [...newProject.technologies, newTechnology.trim()]
+      })
+      setNewTechnology('')
+    }
+  }
+
+  const removeTechnology = (index: number) => {
+    setNewProject({
+      ...newProject,
+      technologies: newProject.technologies.filter((_, i) => i !== index)
+    })
+  }
 
   const handleAddProject = () => {
     onAdd(newProject)
@@ -330,9 +410,46 @@ const ProjectsEditor: React.FC<{
       githubUrl: '',
       liveUrl: '',
       featured: false,
-      priority: 999,
+      priority: 1,
       category: 'web'
     })
+  }
+
+  const handleEditProject = (project: Project) => {
+    setNewProject({
+      title: project.title,
+      description: project.description,
+      longDescription: project.longDescription || '',
+      image: project.image,
+      technologies: project.technologies,
+      githubUrl: project.githubUrl || '',
+      liveUrl: project.liveUrl || '',
+      featured: project.featured || false,
+      priority: project.priority || 1,
+      category: project.category
+    })
+    setEditingProject(project)
+    setShowAddForm(true)
+  }
+
+  const handleUpdateProject = () => {
+    if (editingProject) {
+      onUpdate(editingProject.id!, newProject)
+      setShowAddForm(false)
+      setEditingProject(null)
+      setNewProject({
+        title: '',
+        description: '',
+        longDescription: '',
+        image: '/images/project.jpg',
+        technologies: [],
+        githubUrl: '',
+        liveUrl: '',
+        featured: false,
+        priority: 1,
+        category: 'web'
+      })
+    }
   }
 
   const sortedProjects = [...projects].sort((a, b) => (a.priority || 999) - (b.priority || 999))
@@ -359,7 +476,49 @@ const ProjectsEditor: React.FC<{
           animate={{ opacity: 1, y: 0 }}
           className="card"
         >
-          <h4 className="text-lg font-semibold mb-4">Nouveau Projet</h4>
+          <h4 className="text-lg font-semibold mb-4">
+            {editingProject ? 'Modifier le projet' : 'Nouveau Projet'}
+          </h4>
+
+          {/* Image Upload */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+              Image du projet
+            </label>
+            <div className="flex items-center space-x-4">
+              <div className="w-32 h-20 border-2 border-dashed border-dark-300 dark:border-dark-600 rounded-lg flex items-center justify-center overflow-hidden">
+                {newProject.image && newProject.image !== '/images/project.jpg' ? (
+                  <img
+                    src={newProject.image}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <ImageIcon className="w-8 h-8 text-dark-400" />
+                )}
+              </div>
+              <div className="flex-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <label
+                  htmlFor="image-upload"
+                  className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 cursor-pointer transition-colors"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>{isUploading ? 'Chargement...' : 'Choisir une image'}</span>
+                </label>
+                <p className="text-xs text-dark-500 dark:text-dark-400 mt-1">
+                  Formats acceptés: JPG, PNG, GIF (max 5MB)
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
@@ -426,15 +585,69 @@ const ProjectsEditor: React.FC<{
               </label>
             </div>
           </div>
+
+          {/* Technologies */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+              Technologies utilisées
+            </label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {newProject.technologies.map((tech, index) => (
+                <span
+                  key={index}
+                  className="flex items-center space-x-1 px-3 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-sm rounded-full"
+                >
+                  <span>{tech}</span>
+                  <button
+                    onClick={() => removeTechnology(index)}
+                    className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={newTechnology}
+                onChange={(e) => setNewTechnology(e.target.value)}
+                placeholder="Ajouter une technologie"
+                className="flex-1 px-3 py-2 border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
+                onKeyPress={(e) => e.key === 'Enter' && addTechnology()}
+              />
+              <button
+                onClick={addTechnology}
+                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
           <div className="flex space-x-2 mt-4">
             <button
-              onClick={handleAddProject}
+              onClick={editingProject ? handleUpdateProject : handleAddProject}
               className="btn-primary"
             >
-              Ajouter
+              {editingProject ? 'Modifier' : 'Ajouter'}
             </button>
             <button
-              onClick={() => setShowAddForm(false)}
+              onClick={() => {
+                setShowAddForm(false)
+                setEditingProject(null)
+                setNewProject({
+                  title: '',
+                  description: '',
+                  longDescription: '',
+                  image: '/images/project.jpg',
+                  technologies: [],
+                  githubUrl: '',
+                  liveUrl: '',
+                  featured: false,
+                  priority: 1,
+                  category: 'web'
+                })
+              }}
               className="btn-secondary"
             >
               Annuler
@@ -490,14 +703,9 @@ const ProjectsEditor: React.FC<{
                   <ArrowDown className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => {
-                    const newTitle = prompt('Nouveau titre:', project.title)
-                    if (newTitle && newTitle.trim()) {
-                      onUpdate(project.id!, { title: newTitle.trim() })
-                    }
-                  }}
+                  onClick={() => handleEditProject(project)}
                   className="p-1 hover:bg-dark-100 dark:hover:bg-dark-700 rounded"
-                  title="Modifier le titre"
+                  title="Modifier le projet"
                 >
                   <Edit3 className="w-4 h-4" />
                 </button>
@@ -679,6 +887,125 @@ const SkillsEditor: React.FC<{
           </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+// Personal Info Editor Component
+const PersonalInfoEditor: React.FC<{
+  personalInfo: PersonalInfo
+  onUpdate: (info: PersonalInfo) => void
+}> = ({ personalInfo, onUpdate }) => {
+  const [editedInfo, setEditedInfo] = useState<PersonalInfo>(personalInfo)
+
+  const handleSave = () => {
+    onUpdate(editedInfo)
+  }
+
+  return (
+    <div className="space-y-6">
+      <h3 className="text-xl font-semibold text-dark-900 dark:text-white">
+        Informations Personnelles
+      </h3>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            Nom complet
+          </label>
+          <input
+            type="text"
+            value={editedInfo.name}
+            onChange={(e) => setEditedInfo({ ...editedInfo, name: e.target.value })}
+            className="w-full px-3 py-2 border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            Titre professionnel
+          </label>
+          <input
+            type="text"
+            value={editedInfo.title}
+            onChange={(e) => setEditedInfo({ ...editedInfo, title: e.target.value })}
+            className="w-full px-3 py-2 border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            Description personnelle
+          </label>
+          <textarea
+            value={editedInfo.bio}
+            onChange={(e) => setEditedInfo({ ...editedInfo, bio: e.target.value })}
+            className="w-full px-3 py-2 border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
+            rows={4}
+            placeholder="Développeur full stack basé à Orthez / Bayonne, passionné par la création d'expériences web modernes, performantes et maintenables."
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            Localisation
+          </label>
+          <input
+            type="text"
+            value={editedInfo.location}
+            onChange={(e) => setEditedInfo({ ...editedInfo, location: e.target.value })}
+            className="w-full px-3 py-2 border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            Email
+          </label>
+          <input
+            type="email"
+            value={editedInfo.email}
+            onChange={(e) => setEditedInfo({ ...editedInfo, email: e.target.value })}
+            className="w-full px-3 py-2 border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            Téléphone
+          </label>
+          <input
+            type="text"
+            value={editedInfo.phone || ''}
+            onChange={(e) => setEditedInfo({ ...editedInfo, phone: e.target.value })}
+            className="w-full px-3 py-2 border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            Statut de disponibilité
+          </label>
+          <select
+            value={editedInfo.availability || 'available'}
+            onChange={(e) => setEditedInfo({ ...editedInfo, availability: e.target.value as 'available' | 'busy' | 'unavailable' })}
+            className="w-full px-3 py-2 border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
+          >
+            <option value="available">Disponible</option>
+            <option value="busy">Occupé</option>
+            <option value="unavailable">Non disponible</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="flex space-x-2 mt-4">
+        <button
+          onClick={handleSave}
+          className="btn-primary"
+        >
+          Sauvegarder
+        </button>
+      </div>
     </div>
   )
 }

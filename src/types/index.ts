@@ -53,4 +53,5 @@ export interface PersonalInfo {
   phone?: string
   resumeUrl?: string
   socialLinks: SocialLink[]
+  availability?: 'available' | 'busy' | 'unavailable'
 }
