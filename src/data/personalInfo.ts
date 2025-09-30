@@ -4,6 +4,7 @@ export const personalInfo: PersonalInfo = {
   name: "Edouard Clemenceau",
   title: "Développeur Full Stack",
   bio: "Développeur full stack basé à Orthez / Bayonne, passionné par la création d'expériences web modernes, performantes et maintenables.",
+  bioExtended: "Basé à Orthez / Bayonne, France, je me spécialise dans la création d'applications web modernes et performantes. Mon approche combine créativité et rigueur technique pour livrer des solutions qui répondent parfaitement aux besoins des utilisateurs.",
   location: "Orthez / Bayonne, France",
   email: "edouard.clemenceau.pro@gmail.com",
   phone: "0779406184",

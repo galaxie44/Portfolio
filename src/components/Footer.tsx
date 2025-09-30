@@ -38,6 +38,7 @@ const Footer = () => {
                     <span className="sr-only">{social.name}</span>
                     {social.name === 'GitHub' && '🐙'}
                     {social.name === 'LinkedIn' && '💼'}
+                    {social.name === 'Instagram' && '📷'}
                     {social.name === 'Twitter' && '🐦'}
                   </motion.a>
                 ))}

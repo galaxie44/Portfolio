@@ -38,13 +38,13 @@ import ExperienceManagement from './ExperienceManagement'
 
 interface AdminEditModeProps {
   onClose: () => void
-  initialTab?: 'projects' | 'skills' | 'experiences' | 'personal'
-  allowedTabs?: ('projects' | 'skills' | 'experiences' | 'personal')[]
+  initialTab?: 'projects' | 'skills' | 'experiences' | 'personal' | 'biography'
+  allowedTabs?: ('projects' | 'skills' | 'experiences' | 'personal' | 'biography')[]
 }
 
-const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose, initialTab = 'projects', allowedTabs = ['projects', 'skills', 'experiences', 'personal'] }) => {
+const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose, initialTab = 'projects', allowedTabs = ['projects', 'skills', 'experiences', 'personal', 'biography'] }) => {
   const { isAuthenticated } = useAuth()
-  const [activeTab, setActiveTab] = useState<'projects' | 'skills' | 'experiences' | 'personal'>(initialTab)
+  const [activeTab, setActiveTab] = useState<'projects' | 'skills' | 'experiences' | 'personal' | 'biography'>(initialTab)
   const [projects, setProjects] = useState<Project[]>([])
   const [skills, setSkills] = useState<Skill[]>([])
   const [experiences, setExperiences] = useState<Experience[]>([])
@@ -92,7 +92,10 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose, initialTab = 'pr
     if (personalInfo) {
       savePersonalInfo(personalInfo)
       setPersonalInfo(getPersonalInfo() || defaultPersonalInfo)
-      alert('Informations personnelles sauvegardées avec succès!')
+      // notifier la page About pour recharger
+      window.dispatchEvent(new Event('personalInfoUpdated'))
+      // confirmation visuelle
+      alert('Informations sauvegardées avec succès!')
     }
   }
 
@@ -180,7 +183,7 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose, initialTab = 'pr
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-white dark:bg-dark-800 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden"
+        className="bg-white dark:bg-dark-800 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-dark-200 dark:border-dark-700">
@@ -245,60 +248,81 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose, initialTab = 'pr
               Informations
             </button>
           )}
+          {allowedTabs.includes('biography') && (
+            <button
+              onClick={() => setActiveTab('biography')}
+              className={`px-6 py-3 font-medium transition-colors ${
+                activeTab === 'biography'
+                  ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
+                  : 'text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white'
+              }`}
+            >
+              Biographie
+            </button>
+          )}
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-          {activeTab === 'projects' && (
-            <ProjectsEditor
-              projects={projects}
-              onAdd={handleAddProject}
-              onUpdate={handleUpdateProject}
-              onDelete={handleDeleteProject}
-              onMovePriority={moveProjectPriority}
-              showAddForm={showAddForm}
-              setShowAddForm={setShowAddForm}
-              editingProject={editingProject}
-              setEditingProject={setEditingProject}
-            />
-          )}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-6">
+            {activeTab === 'projects' && (
+              <ProjectsEditor
+                projects={projects}
+                onAdd={handleAddProject}
+                onUpdate={handleUpdateProject}
+                onDelete={handleDeleteProject}
+                onMovePriority={moveProjectPriority}
+                showAddForm={showAddForm}
+                setShowAddForm={setShowAddForm}
+                editingProject={editingProject}
+                setEditingProject={setEditingProject}
+              />
+            )}
 
-          {activeTab === 'skills' && (
-            <SkillsEditor
-              skills={skills}
-              onAdd={handleAddSkill}
-              onUpdate={handleUpdateSkill}
-              onDelete={handleDeleteSkill}
-              showAddForm={showAddForm}
-              setShowAddForm={setShowAddForm}
-              editingSkill={editingSkill}
-              setEditingSkill={setEditingSkill}
-            />
-          )}
+            {activeTab === 'skills' && (
+              <SkillsEditor
+                skills={skills}
+                onAdd={handleAddSkill}
+                onUpdate={handleUpdateSkill}
+                onDelete={handleDeleteSkill}
+                showAddForm={showAddForm}
+                setShowAddForm={setShowAddForm}
+                editingSkill={editingSkill}
+                setEditingSkill={setEditingSkill}
+              />
+            )}
 
-          {activeTab === 'experiences' && (
-            <ExperienceManagement
-              experiences={experiences}
-              onAdd={handleAddExperience}
-              onUpdate={handleUpdateExperience}
-              onDelete={handleDeleteExperience}
-              onEdit={handleEditExperience}
-              showForm={showAddForm}
-              editingExperience={editingExperience}
-              onShowForm={setShowAddForm}
-              onCancelEdit={() => {
-                setShowAddForm(false)
-                setEditingExperience(null)
-              }}
-            />
-          )}
+            {activeTab === 'experiences' && (
+              <ExperienceManagement
+                experiences={experiences}
+                onAdd={handleAddExperience}
+                onUpdate={handleUpdateExperience}
+                onDelete={handleDeleteExperience}
+                onEdit={handleEditExperience}
+                showForm={showAddForm}
+                editingExperience={editingExperience}
+                onShowForm={setShowAddForm}
+                onCancelEdit={() => {
+                  setShowAddForm(false)
+                  setEditingExperience(null)
+                }}
+              />
+            )}
 
-          {activeTab === 'personal' && (
-            <PersonalInfoEditor
-              personalInfo={personalInfo}
-              onUpdate={setPersonalInfo}
-            />
-          )}
+            {activeTab === 'personal' && (
+              <PersonalInfoEditor
+                personalInfo={personalInfo}
+                onUpdate={setPersonalInfo}
+              />
+            )}
+
+            {activeTab === 'biography' && (
+              <BiographyEditor
+                personalInfo={personalInfo}
+                onUpdate={setPersonalInfo}
+              />
+            )}
+          </div>
         </div>
 
         {/* Footer */}
@@ -317,6 +341,8 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose, initialTab = 'pr
                 ? handleSaveSkills
                 : activeTab === 'experiences'
                 ? handleSaveExperiences
+                : activeTab === 'biography'
+                ? handleSavePersonalInfo
                 : handleSavePersonalInfo
             }
             className="btn-primary flex items-center space-x-2"
@@ -330,6 +356,8 @@ const AdminEditMode: React.FC<AdminEditModeProps> = ({ onClose, initialTab = 'pr
                   ? 'Compétences'
                   : activeTab === 'experiences'
                   ? 'Parcours'
+                  : activeTab === 'biography'
+                  ? 'Biographie'
                   : 'Informations'
               }
             </span>
@@ -935,14 +963,13 @@ const PersonalInfoEditor: React.FC<{
 
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-            Description personnelle
+            Titre professionnel
           </label>
-          <textarea
-            value={editedInfo.bio}
-            onChange={(e) => setEditedInfo({ ...editedInfo, bio: e.target.value })}
+          <input
+            type="text"
+            value={editedInfo.title}
+            onChange={(e) => setEditedInfo({ ...editedInfo, title: e.target.value })}
             className="w-full px-3 py-2 border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
-            rows={4}
-            placeholder="Développeur full stack basé à Orthez / Bayonne, passionné par la création d'expériences web modernes, performantes et maintenables."
           />
         </div>
 
@@ -995,6 +1022,63 @@ const PersonalInfoEditor: React.FC<{
             <option value="busy">Occupé</option>
             <option value="unavailable">Non disponible</option>
           </select>
+        </div>
+      </div>
+
+      <div className="flex space-x-2 mt-4">
+        <button
+          onClick={handleSave}
+          className="btn-primary"
+        >
+          Sauvegarder
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// Biography Editor Component
+const BiographyEditor: React.FC<{
+  personalInfo: PersonalInfo
+  onUpdate: (info: PersonalInfo) => void
+}> = ({ personalInfo, onUpdate }) => {
+  const [editedInfo, setEditedInfo] = useState<PersonalInfo>(personalInfo)
+
+  const handleSave = () => {
+    onUpdate(editedInfo)
+  }
+
+  return (
+    <div className="space-y-6">
+      <h3 className="text-xl font-semibold text-dark-900 dark:text-white">
+        Édition de la Biographie
+      </h3>
+
+      <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            Description personnelle (1er paragraphe)
+          </label>
+          <textarea
+            value={editedInfo.bio}
+            onChange={(e) => setEditedInfo({ ...editedInfo, bio: e.target.value })}
+            className="w-full px-3 py-2 border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
+            rows={4}
+            placeholder="Développeur full stack basé à Orthez / Bayonne, passionné par la création d'expériences web modernes, performantes et maintenables."
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            Paragraphe de présentation détaillé (2ème paragraphe)
+          </label>
+          <textarea
+            value={editedInfo.bioExtended || ''}
+            onChange={(e) => setEditedInfo({ ...editedInfo, bioExtended: e.target.value })}
+            className="w-full px-3 py-2 border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
+            rows={4}
+            placeholder="Basé à Orthez / Bayonne, France, je me spécialise dans la création d'applications web modernes et performantes. Mon approche combine créativité et rigueur technique pour livrer des solutions qui répondent parfaitement aux besoins des utilisateurs."
+          />
         </div>
       </div>
 

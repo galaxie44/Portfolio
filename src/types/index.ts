@@ -48,6 +48,7 @@ export interface PersonalInfo {
   name: string
   title: string
   bio: string
+  bioExtended?: string
   location: string
   email: string
   phone?: string

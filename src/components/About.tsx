@@ -3,9 +3,9 @@ import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { Edit3 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { personalInfo, experiences as defaultExperiences } from '../data/personalInfo'
-import { getExperiences } from '../utils/adminStorage'
-import { Experience } from '../types'
+import { personalInfo as defaultPersonalInfo, experiences as defaultExperiences } from '../data/personalInfo'
+import { getExperiences, getPersonalInfo } from '../utils/adminStorage'
+import { Experience, PersonalInfo } from '../types'
 import AdminEditMode from './AdminEditMode'
 
 const About = () => {
@@ -15,8 +15,9 @@ const About = () => {
   })
   const { isAuthenticated } = useAuth()
   const [showEditMode, setShowEditMode] = useState(false)
-  const [editModeType, setEditModeType] = useState<'personal' | 'experiences'>('personal')
+  const [editModeType, setEditModeType] = useState<'personal' | 'experiences' | 'biography'>('personal')
   const [experiences, setExperiences] = useState<Experience[]>(defaultExperiences)
+  const [info, setInfo] = useState<PersonalInfo>(getPersonalInfo() || defaultPersonalInfo)
 
   useEffect(() => {
     // Charger les expériences depuis le localStorage
@@ -24,6 +25,17 @@ const About = () => {
     if (storedExperiences.length > 0) {
       setExperiences(storedExperiences)
     }
+    // Charger les infos personnelles depuis le localStorage
+    const storedInfo = getPersonalInfo()
+    setInfo(storedInfo || defaultPersonalInfo)
+
+    // Ecouter les mises à jour sauvegardées depuis le modal
+    const handleInfoUpdated = () => {
+      const updated = getPersonalInfo()
+      setInfo(updated || defaultPersonalInfo)
+    }
+    window.addEventListener('personalInfoUpdated', handleInfoUpdated as EventListener)
+    return () => window.removeEventListener('personalInfoUpdated', handleInfoUpdated as EventListener)
   }, [])
 
   const containerVariants = {
@@ -85,12 +97,14 @@ const About = () => {
             <motion.div variants={itemVariants} className="space-y-6">
               <div className="prose prose-lg dark:prose-invert max-w-none">
                 <p className="text-dark-700 dark:text-dark-300 leading-relaxed">
-                  {personalInfo.bio}
+                  {info.bio}
                 </p>
                 <p className="text-dark-700 dark:text-dark-300 leading-relaxed">
-                  Basé à {personalInfo.location}, je me spécialise dans la création d'applications web modernes
-                  et performantes. Mon approche combine créativité et rigueur technique pour livrer des
-                  solutions qui répondent parfaitement aux besoins des utilisateurs.
+                  {info.bioExtended || (
+                    <>Basé à {info.location}, je me spécialise dans la création d'applications web modernes
+                    et performantes. Mon approche combine créativité et rigueur technique pour livrer des
+                    solutions qui répondent parfaitement aux besoins des utilisateurs.</>
+                  )}
                 </p>
               </div>
 
@@ -99,33 +113,33 @@ const About = () => {
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
                   <span className="text-dark-700 dark:text-dark-300">
-                    <strong>Localisation:</strong> {personalInfo.location}
+                    <strong>Localisation:</strong> {info.location}
                   </span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
                   <span className="text-dark-700 dark:text-dark-300">
-                    <strong>Email:</strong> {personalInfo.email}
+                    <strong>Email:</strong> {info.email}
                   </span>
                 </div>
-                {personalInfo.phone && (
+                {info.phone && (
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
                     <span className="text-dark-700 dark:text-dark-300">
-                      <strong>Téléphone:</strong> {personalInfo.phone}
+                      <strong>Téléphone:</strong> {info.phone}
                     </span>
                   </div>
                 )}
-                {personalInfo.availability && (
+                {info.availability && (
                   <div className="flex items-center space-x-3">
                     <div className={`w-2 h-2 rounded-full ${
-                      personalInfo.availability === 'available' ? 'bg-green-500' :
-                      personalInfo.availability === 'busy' ? 'bg-yellow-500' : 'bg-red-500'
+                      info.availability === 'available' ? 'bg-green-500' :
+                      info.availability === 'busy' ? 'bg-yellow-500' : 'bg-red-500'
                     }`}></div>
                     <span className="text-dark-700 dark:text-dark-300">
                       <strong>Statut:</strong> {
-                        personalInfo.availability === 'available' ? 'Disponible' :
-                        personalInfo.availability === 'busy' ? 'Occupé' : 'Non disponible'
+                        info.availability === 'available' ? 'Disponible' :
+                        info.availability === 'busy' ? 'Occupé' : 'Non disponible'
                       }
                     </span>
                   </div>
@@ -167,11 +181,11 @@ const About = () => {
                         </p>
                       </div>
 
-                      <ul className="space-y-2 mb-4">
+                      <ul className="space-y-2 mb-4 pl-2">
                         {exp.description.map((desc, descIndex) => (
-                          <li key={descIndex} className="flex items-start space-x-2">
-                            <span className="text-primary-500 mt-1">•</span>
-                            <span className="text-dark-700 dark:text-dark-300 text-sm">
+                          <li key={descIndex} className="flex items-start">
+                            <span className="text-primary-500 mr-2 mt-0 flex-shrink-0">•</span>
+                            <span className="text-dark-700 dark:text-dark-300 text-sm leading-relaxed">
                               {desc}
                             </span>
                           </li>
@@ -201,7 +215,7 @@ const About = () => {
       {showEditMode && (
         <AdminEditMode
           initialTab={editModeType}
-          allowedTabs={['personal', 'experiences']}
+          allowedTabs={['personal', 'experiences', 'biography']}
           onClose={() => {
             setShowEditMode(false)
             // Recharger les expériences après fermeture du mode édition
