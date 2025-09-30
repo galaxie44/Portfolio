@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { Mail, Phone, MapPin, Send, Github, Linkedin, Instagram } from 'lucide-react'
-import { personalInfo } from '../data/personalInfo'
-import { ContactForm } from '../types'
+import { personalInfo as defaultPersonalInfo } from '../data/personalInfo'
+import { ContactForm, PersonalInfo } from '../types'
+import { getPersonalInfo } from '../utils/adminStorage'
 import { saveMessage } from '../utils/messageStorage'
 
 const Contact = () => {
@@ -18,6 +19,19 @@ const Contact = () => {
     subject: '',
     message: ''
   })
+
+  // Load personal info from storage so availability reflects admin changes
+  const [info, setInfo] = useState<PersonalInfo>(getPersonalInfo() || defaultPersonalInfo)
+
+  useEffect(() => {
+    const handlePersonalInfoUpdate = () => {
+      setInfo(getPersonalInfo() || defaultPersonalInfo)
+    }
+    window.addEventListener('personalInfoUpdated', handlePersonalInfoUpdate)
+    return () => {
+      window.removeEventListener('personalInfoUpdated', handlePersonalInfoUpdate)
+    }
+  }, [])
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
@@ -116,18 +130,18 @@ const Contact = () => {
                     </div>
                     <div>
                       <h4 className="font-semibold text-dark-900 dark:text-white">Email</h4>
-                      <p className="text-dark-600 dark:text-dark-400">{personalInfo.email}</p>
+                      <p className="text-dark-600 dark:text-dark-400">{info.email}</p>
                     </div>
                   </div>
 
-                  {personalInfo.phone && (
+                  {info.phone && (
                     <div className="flex items-start space-x-4">
                       <div className="p-3 bg-primary-100 dark:bg-primary-900 rounded-lg">
                         <Phone className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                       </div>
                       <div>
                         <h4 className="font-semibold text-dark-900 dark:text-white">Téléphone</h4>
-                        <p className="text-dark-600 dark:text-dark-400">{personalInfo.phone}</p>
+                        <p className="text-dark-600 dark:text-dark-400">{info.phone}</p>
                       </div>
                     </div>
                   )}
@@ -138,7 +152,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <h4 className="font-semibold text-dark-900 dark:text-white">Localisation</h4>
-                      <p className="text-dark-600 dark:text-dark-400">{personalInfo.location}</p>
+                      <p className="text-dark-600 dark:text-dark-400">{info.location}</p>
                     </div>
                   </div>
                 </div>
@@ -150,7 +164,7 @@ const Contact = () => {
                   Suivez-moi
                 </h4>
                 <div className="flex space-x-4">
-                  {personalInfo.socialLinks.map((social) => (
+                  {info.socialLinks.map((social: { name: string; url: string; icon: string }) => (
                     <motion.a
                       key={social.name}
                       whileHover={{ scale: 1.1, y: -2 }}
@@ -172,12 +186,26 @@ const Contact = () => {
                   Disponibilité
                 </h4>
                 <p className="text-dark-600 dark:text-dark-400 mb-3">
-                  Je suis actuellement disponible pour de nouveaux projets et opportunités.
+                  {info.availability === 'available' && 'Je suis actuellement disponible pour de nouveaux projets et opportunités.'}
+                  {info.availability === 'busy' && "Je suis actuellement occupé. Je peux étudier de nouvelles opportunités prochainement."}
+                  {info.availability === 'unavailable' && "Je ne suis pas disponible pour de nouveaux projets pour le moment."}
                 </p>
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-green-600 dark:text-green-400 font-medium">
-                    Disponible
+                  <div className={`w-3 h-3 rounded-full animate-pulse ${
+                    info.availability === 'available'
+                      ? 'bg-green-500'
+                      : info.availability === 'busy'
+                      ? 'bg-yellow-500'
+                      : 'bg-red-500'
+                  }`}></div>
+                  <span className={`text-sm font-medium ${
+                    info.availability === 'available'
+                      ? 'text-green-600 dark:text-green-400'
+                      : info.availability === 'busy'
+                      ? 'text-yellow-600 dark:text-yellow-400'
+                      : 'text-red-600 dark:text-red-400'
+                  }`}>
+                    {info.availability === 'available' ? 'Disponible' : info.availability === 'busy' ? 'Occupé' : 'Non disponible'}
                   </span>
                 </div>
               </div>
