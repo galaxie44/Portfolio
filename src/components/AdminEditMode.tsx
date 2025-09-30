@@ -973,6 +973,19 @@ const PersonalInfoEditor: React.FC<{
           />
         </div>
 
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            Texte d’intro (Accueil)
+          </label>
+          <textarea
+            value={editedInfo.heroIntro || ''}
+            onChange={(e) => setEditedInfo({ ...editedInfo, heroIntro: e.target.value })}
+            className="w-full px-3 py-2 border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
+            rows={3}
+            placeholder="Texte court affiché dans le Hero, différent de la biographie."
+          />
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
             Localisation
@@ -995,6 +1008,44 @@ const PersonalInfoEditor: React.FC<{
             onChange={(e) => setEditedInfo({ ...editedInfo, email: e.target.value })}
             className="w-full px-3 py-2 border border-dark-200 dark:border-dark-700 rounded-lg bg-white dark:bg-dark-800 text-dark-900 dark:text-white"
           />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            CV (PDF)
+          </label>
+          <div className="flex items-center gap-3">
+            <input
+              type="file"
+              accept="application/pdf"
+              id="cv-upload"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                const reader = new FileReader()
+                reader.onload = (ev) => {
+                  const data = ev.target?.result as string
+                  setEditedInfo({
+                    ...editedInfo,
+                    resumeBase64: data,
+                    resumeFilename: file.name,
+                    resumeUrl: ''
+                  })
+                }
+                reader.readAsDataURL(file)
+              }}
+            />
+            <label htmlFor="cv-upload" className="px-4 py-2 bg-primary-600 text-white rounded-lg cursor-pointer hover:bg-primary-700">
+              Choisir un PDF
+            </label>
+            {editedInfo.resumeFilename && (
+              <span className="text-sm text-dark-600 dark:text-dark-300 truncate">
+                {editedInfo.resumeFilename}
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-dark-500 dark:text-dark-400 mt-1">Le fichier sera stocké localement (Base64) et utilisé par le bouton Télécharger CV.</p>
         </div>
 
         <div>

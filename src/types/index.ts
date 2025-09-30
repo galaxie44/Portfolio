@@ -49,10 +49,13 @@ export interface PersonalInfo {
   title: string
   bio: string
   bioExtended?: string
+  heroIntro?: string
   location: string
   email: string
   phone?: string
   resumeUrl?: string
+  resumeBase64?: string
+  resumeFilename?: string
   socialLinks: SocialLink[]
   availability?: 'available' | 'busy' | 'unavailable'
 }

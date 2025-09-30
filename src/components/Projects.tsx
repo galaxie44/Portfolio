@@ -94,7 +94,9 @@ const Projects = () => {
                   <motion.div
                     key={project.id}
                     whileHover={{ y: -5 }}
-                    className="card hover:shadow-2xl transition-all duration-300 overflow-hidden group"
+                    className={`card hover:shadow-2xl transition-all duration-300 overflow-hidden group ${
+                      featuredProjects.length === 1 ? 'lg:col-span-2 lg:justify-self-center' : ''
+                    }`}
                   >
                     <div className="relative overflow-hidden rounded-lg mb-6">
                       <div className="aspect-video bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center">
@@ -236,7 +238,8 @@ const Projects = () => {
                 </p>
               </motion.div>
             ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="flex justify-center">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-8 max-w-4xl mx-auto justify-center">
                 {filteredProjects.map((project) => (
                 <motion.div
                   key={project.id}
@@ -245,7 +248,9 @@ const Projects = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   whileHover={{ y: -5 }}
-                  className="card hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                  className={`card hover:shadow-xl transition-all duration-300 overflow-hidden group ${
+                    filteredProjects.length === 1 ? 'sm:col-span-2 lg:col-span-2 justify-self-center' : ''
+                  }`}
                 >
                   <div className="relative overflow-hidden rounded-lg mb-4">
                     <div className="aspect-video bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center">
@@ -339,6 +344,7 @@ const Projects = () => {
                   </div>
                 </motion.div>
               ))}
+                </div>
               </div>
             )}
           </motion.div>

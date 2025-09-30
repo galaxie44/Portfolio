@@ -1,6 +1,9 @@
 import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import { ChevronDown, Download, Github, Linkedin, Mail, Instagram } from 'lucide-react'
-import { personalInfo } from '../data/personalInfo'
+import { personalInfo as defaultPersonalInfo } from '../data/personalInfo'
+import { getPersonalInfo } from '../utils/adminStorage'
+import { PersonalInfo } from '../types'
 
 const Hero = () => {
   const scrollToNext = () => {
@@ -22,6 +25,16 @@ const Hero = () => {
         return <Mail className="w-5 h-5" />
     }
   }
+
+  const [info, setInfo] = useState<PersonalInfo>(getPersonalInfo() || defaultPersonalInfo)
+
+  useEffect(() => {
+    const handlePersonalInfoUpdate = () => {
+      setInfo(getPersonalInfo() || defaultPersonalInfo)
+    }
+    window.addEventListener('personalInfoUpdated', handlePersonalInfoUpdate)
+    return () => window.removeEventListener('personalInfoUpdated', handlePersonalInfoUpdate)
+  }, [])
 
   return (
     <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden">
@@ -52,7 +65,7 @@ const Hero = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-5xl md:text-7xl font-bold mb-6"
           >
-            <span className="gradient-text">{personalInfo.name}</span>
+            <span className="gradient-text">{info.name}</span>
           </motion.h1>
 
           {/* Title */}
@@ -62,7 +75,7 @@ const Hero = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-2xl md:text-3xl text-dark-600 dark:text-dark-400 mb-8 font-light"
           >
-            {personalInfo.title}
+            {info.title}
           </motion.h2>
 
           {/* Bio */}
@@ -72,7 +85,8 @@ const Hero = () => {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="text-lg text-dark-600 dark:text-dark-400 mb-12 max-w-3xl mx-auto leading-relaxed"
           >
-            {personalInfo.bio}
+            Je conçois des applications web modernes, performantes et maintenables, avec un fort
+            accent sur l'expérience utilisateur et la qualité du code.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -91,12 +105,12 @@ const Hero = () => {
               Me contacter
             </motion.a>
 
-            {personalInfo.resumeUrl && (
+            {(info.resumeBase64 || info.resumeUrl) && (
               <motion.a
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                href={personalInfo.resumeUrl}
-                download
+                href={info.resumeBase64 || info.resumeUrl}
+                download={info.resumeFilename || 'CV.pdf'}
                 className="btn-secondary text-lg px-8 py-4 flex items-center gap-2"
               >
                 <Download className="w-5 h-5" />
@@ -112,7 +126,7 @@ const Hero = () => {
             transition={{ duration: 0.6, delay: 1 }}
             className="flex justify-center space-x-6 mb-16"
           >
-            {personalInfo.socialLinks.map((social) => (
+            {info.socialLinks.map((social) => (
               <motion.a
                 key={social.name}
                 whileHover={{ scale: 1.2, y: -2 }}
