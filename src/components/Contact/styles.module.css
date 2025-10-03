@@ -1,0 +1,11 @@
+.gridWrap {
+  @apply grid lg:grid-cols-2 gap-12 items-stretch;
+}
+
+.leftCol {
+  @apply flex flex-col h-full space-y-8;
+}
+
+.rightCol {
+  @apply h-full flex;
+}

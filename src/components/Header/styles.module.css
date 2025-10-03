@@ -1,0 +1,9 @@
+.headerWrap {
+  @apply fixed top-0 left-0 right-0 z-40 backdrop-blur bg-white/70 dark:bg-dark-900/70 border-b border-transparent dark:border-dark-800;
+}
+.inner {
+  @apply container flex items-center justify-between py-4;
+}
+.navLink {
+  @apply text-dark-700 dark:text-dark-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors;
+}

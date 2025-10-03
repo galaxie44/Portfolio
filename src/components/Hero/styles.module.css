@@ -1,0 +1,12 @@
+.heroSection {
+  @apply min-h-screen flex items-center justify-center relative overflow-hidden;
+}
+.ctaRow {
+  @apply flex flex-col sm:flex-row gap-6 justify-center items-center mb-16;
+}
+.socialRow {
+  @apply flex justify-center space-x-6 mb-16;
+}
+.scrollBtn {
+  @apply p-2 rounded-full bg-white dark:bg-dark-800 shadow-lg hover:shadow-xl transition-all duration-300 text-dark-600 dark:text-dark-400 hover:text-primary-600 dark:hover:text-primary-400;
+}
